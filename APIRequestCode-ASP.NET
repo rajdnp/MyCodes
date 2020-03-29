@@ -1,0 +1,44 @@
+ public async Task<ActionResult> CustomerOverview()
+        {
+            string URL = "";
+            string urlParameters = "rajesh1122";
+            var credentials = Encoding.ASCII.GetBytes("USERNAME:PASSWORD");
+            CustomerOverviewViewModel customerOverviewViewModel = new CustomerOverviewViewModel();
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(URL);
+
+            // Add an Accept header for JSON format.
+            client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+
+            //Authentication Header
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(credentials));
+
+
+            // List data response.
+            HttpResponseMessage response = client.GetAsync(urlParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
+            if (response.IsSuccessStatusCode)
+            {
+                var dataObjects = response.Content.ReadAsAsync<CustomerOverviewViewModel>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                customerOverviewViewModel = new CustomerOverviewViewModel
+                {
+                    result = new Models.Result
+                    {
+
+                        package = dataObjects.result.package,
+                        requests = dataObjects.result.requests,
+                        reputation = dataObjects.result.reputation
+
+                    }
+                };
+            }
+            else
+            {
+            }
+
+            //Make any other calls using HttpClient here.
+
+            //Dispose once all HttpClient calls are complete. This is not necessary if the containing object will be disposed of; for example in this case the HttpClient instance will be disposed automatically when the application terminates so the following call is superfluous.
+            client.Dispose();
+            return View(customerOverviewViewModel);
+        }
